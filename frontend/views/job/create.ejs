@@ -1,0 +1,52 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2>Create a New Job</h2>
+
+  <form id="job-form" method="POST" action="/job/create">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+    <%# --- Basic Job Details --- %>
+    <div class="row">
+      <div class="col-md-6"><div class="mb-3"><label class="form-label" for="title">Title:</label><input class="form-control" type="text" id="title" name="title" placeholder="e.g., Software Engineer" required value="<%= oldInput.title || '' %>"/></div></div>
+      <div class="col-md-6"><div class="mb-3"><label class="form-label" for="company_name">Company Name:</label><input class="form-control" type="text" id="company_name" name="company_name" placeholder="e.g., Tech Corp" required value="<%= oldInput.company_name || '' %>"/></div></div>
+    </div>
+    <div class="mb-3"><label class="form-label" for="description">Description:</label><textarea class="form-control" id="description" name="description" placeholder="Enter job description" required rows="5"><%= oldInput.description || '' %></textarea></div>
+    <div class="row">
+       <div class="col-md-6"><div class="mb-3"><label class="form-label" for="application_deadline">Application Deadline:</label><input class="form-control" type="date" id="application_deadline" name="application_deadline" required value="<%= oldInput.application_deadline || '' %>"/></div></div>
+       <div class="col-md-6"><div class="mb-3"><label class="form-label" for="start_date">Start Date:</label><input class="form-control" type="date" id="start_date" name="start_date" required value="<%= oldInput.start_date || '' %>"/></div></div>
+    </div>
+     <div class="row">
+       <div class="col-md-6"><div class="mb-3"><label class="form-label" for="salary_amount">Salary Amount (Per Year):</label><div class="input-group"><span class="input-group-text">£</span><input class="form-control" type="number" id="salary_amount" name="salary_amount" step="1" min="1" placeholder="e.g., 50000" required value="<%= oldInput.salary_amount || '' %>"/></div><div class="form-text">Enter the annual salary amount.</div></div></div>
+       <%# Removed the visible weekly_hours input column here %>
+     </div>
+     <div class="row">
+       <div class="col-md-6"><div class="mb-3"><label class="form-label" for="working_location">Working Location:</label><select class="form-select" id="working_location" name="working_location" required><option value="" disabled <%= !oldInput.working_location ? 'selected' : '' %>>Select...</option><option value="in_person" <%= oldInput.working_location === 'in_person' ? 'selected' : '' %>>In-Person</option><option value="remote" <%= oldInput.working_location === 'remote' ? 'selected' : '' %>>Remote</option><option value="hybrid" <%= oldInput.working_location === 'hybrid' ? 'selected' : '' %>>Hybrid</option></select></div></div>
+       <div class="col-md-6"><div class="mb-3" id="in-person-location-group" style="<%= (oldInput.working_location === 'in_person' || oldInput.working_location === 'hybrid') ? '' : 'display: none;' %>"><label class="form-label" for="in_person_location">In-Person Location:</label><input class="form-control" type="text" id="in_person_location" name="in_person_location" placeholder="e.g., London" value="<%= oldInput.in_person_location || '' %>" <%= (oldInput.working_location === 'in_person' || oldInput.working_location === 'hybrid') ? 'required' : '' %>/></div></div>
+     </div>
+      <div class="mb-3"> <%# Working Hours Grid Section %>
+           <label class="form-label">Working Hours Details: (Select slots on grid)</label>
+            <p class="form-text text-muted">Select the typical working hours below. The total weekly hours will be calculated automatically. Must be between 1 and 48 hours total.</p>
+           <div class="table-responsive working-hours-grid-container"> <table class="table table-bordered working-hours-grid" id="working-hours-grid"><thead><tr><th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr></thead><tbody> <% const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0')); %><% const allTimes = hours.map(h => `${h}:00`); %><% const days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; %><% allTimes.forEach(time => { %><tr><td><%= time %></td><% days.forEach(day => { %><td class="time-slot" data-day="<%= day %>" data-time="<%= time %>"> </td><% }); %></tr><% }); %></tbody></table></div>
+           <%# Hidden inputs remain %>
+           <input type="hidden" name="weekly_hours" id="weekly_hours" value="<%= oldInput.weekly_hours || '0' %>"/>
+           <input type="hidden" name="working_hours_details" id="working_hours_details" value="<%= typeof oldInput.working_hours_details === 'string' ? oldInput.working_hours_details : JSON.stringify(oldInput.working_hours_details || []) %>"/>
+           <div id="weekly-hours-display" class="mt-2 fw-bold">Total Weekly Hours Selected: <%= oldInput.weekly_hours || '0.0' %></div>
+           <%# Removed the small text about entering hours manually %>
+       </div>
+       <hr/>
+
+
+    <%# Include the skills form partial %>
+    <%- include('_skill_form_partial', { allSkills: allSkills, entitySkillsMap: (oldInput.skills || jobSkillsMap || {}), entityType: 'job' }) %>
+
+
+    <div class="mt-4">
+      <button class="btn btn-primary" type="submit">Create Job</button>
+    </div>
+  </form>
+</div>
+
+<script src="/js/job-form.js" defer></script>
+
+<%- include('../partials/footer') %>

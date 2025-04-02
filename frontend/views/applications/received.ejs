@@ -1,0 +1,87 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2 class="mb-4">Received Applications</h2>
+
+  <% if (applications && applications.length > 0) { %>
+  <div class="table-responsive">
+    <table class="table table-hover border rounded align-middle">
+      <thead>
+        <tr>
+          <th>Application Title</th>
+          <th>Job Title</th>
+          <th>Applicant</th>
+          <th>Status</th>
+          <th>Applied Date</th>
+          <th>Skill Match</th> 
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% applications.forEach(app => { %>
+          <% const requiredSkills = jobSkillsMap[app.job_id] || []; %>
+          <% const userSkills = userSkillsMap[app.applicant_id] || []; %>
+          <% const matchResult = checkOverallSkillMatch(userSkills, requiredSkills); %>
+
+        <tr>
+          <td><%= app.title %></td>
+          <td>
+              <% if (app.job) { %>
+                <a href="/job/job/<%= app.job_id %>"><%= app.job.title %></a>
+              <% } else { %>
+                N/A
+              <% } %>
+          </td>
+          <td>
+              <%= app.applicant ? (app.applicant.username || app.applicant.email) : 'N/A' %>
+          </td>
+          <td>
+            <%
+                let statusTextRec = app.status.charAt(0).toUpperCase() + app.status.slice(1);
+                let badgeClassRec = 'secondary';
+                if (app.status === 'pending') { badgeClassRec = 'warning text-dark'; }
+                else if (app.status === 'hired') { badgeClassRec = 'info'; statusTextRec = 'Offered'; }
+                else if (app.status === 'offer_declined') { badgeClassRec = 'secondary'; statusTextRec = 'Declined'; }
+                else if (app.status === 'accepted') { badgeClassRec = 'success'; }
+                else if (app.status === 'rejected') { badgeClassRec = 'danger'; }
+            %>
+            <span class="badge bg-<%= badgeClassRec %>">
+                <%= statusTextRec %>
+            </span>
+          </td>
+          <td>
+              <%= new Date(app.created_at).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) %></td>
+          <td> 
+              <span class="badge bg-<%= matchResult.badge %>" title="<%= requiredSkills.length > 0 ? 'Compared against ' + requiredSkills.length + ' required skill(s).' : 'No skills required by job.' %>">
+                  <%= matchResult.text %>
+              </span>
+              <% if (userSkills.length === 0 && requiredSkills.length > 0) { %>
+                  <small class="d-block text-muted fst-italic">Applicant skills not set.</small>
+              <% } %>
+          </td>
+          <td>
+            <% if (app.status === 'pending') { %>
+                <a class="btn btn-outline-primary btn-sm" href="/application/edit/<%= app.id %>">Review / Edit Status</a>
+            <% } else if (app.status === 'hired') { %>
+                 <span class="text-muted fst-italic">Offer Sent</span>
+            <% } else if (app.status === 'accepted') { %>
+                 <span class="text-muted fst-italic">Accepted</span>
+            <% } else if (app.status === 'offer_declined') { %>
+                 <span class="text-muted fst-italic">Declined</span>
+            <% } else if (app.status === 'rejected') { %>
+                 <span class="text-muted fst-italic">Rejected</span>
+            <% } else { %>
+                 <span class="text-muted fst-italic">Status Finalized</span>
+            <% } %>
+          </td>
+        </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  </div>
+  <% } else { %>
+    <p class="text-muted">No applications received for your jobs yet.</p>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

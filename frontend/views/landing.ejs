@@ -1,0 +1,19 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4 text-center">
+  <h1>Welcome to Job Matchmaker!</h1>
+  <p class="lead">This is your space to find and post job opportunities.</p>
+
+  <% if (!locals.user) { %>
+  <div class="mt-4">
+    <a class="btn btn-primary btn-lg me-2" href="/auth/signup">Get Started</a>
+    <a class="btn btn-secondary btn-lg ms-2" href="/auth/login">Log In</a>
+  </div>
+  <% } else { %>
+  <div class="mt-4">
+    <a class="btn btn-primary btn-lg" href="/job">Go to Job Board</a>
+  </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>

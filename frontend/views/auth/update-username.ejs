@@ -1,0 +1,39 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-body">
+          <h2 class="card-title text-center mb-4">Update Username</h2>
+           <p class="text-center text-muted mb-4">A confirmation link will be sent to your email address.</p>
+          <form method="POST" action="/auth/update-username">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+            <div class="mb-3">
+              <label for="newUsername" class="form-label">New Username:</label>
+              <input
+                class="form-control"
+                type="text"
+                name="newUsername"
+                id="newUsername"
+                required
+                minlength="3"
+                maxlength="30"
+                pattern="^[a-zA-Z0-9_]+$"
+                title="Username must be 3-30 characters and contain only letters, numbers, and underscores."
+                autofocus
+              />
+               <div class="form-text">Must be 3-30 characters (letters, numbers, underscores only).</div>
+            </div>
+             <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                 <a href="/settings" class="btn btn-secondary">Cancel</a> <%# UPDATED LINK %>
+                 <button class="btn btn-primary" type="submit">Send Confirmation Email</button>
+             </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../partials/footer') %>

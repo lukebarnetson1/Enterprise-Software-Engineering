@@ -1,0 +1,233 @@
+<%- include('../partials/header') %>
+
+<%# Helper function to build query string, preserving existing filters %>
+<%
+function buildQueryString(currentParams, newParams) {
+    const params = { ...currentParams, ...newParams };
+    // Remove page param if resetting filters or setting new ones other than page
+    if (newParams && !newParams.page) {
+        delete params.page;
+    }
+    // Remove empty params
+    Object.keys(params).forEach(key => {
+        if (params[key] === '' || params[key] === null || params[key] === undefined) {
+            delete params[key];
+        }
+    });
+    return new URLSearchParams(params).toString();
+}
+const currentQueryForPagination = buildQueryString(filterValues); // Query string without 'page'
+%>
+
+<div class="container mt-4">
+  <%# Wrap heading and Create button together %>
+  <div class="d-flex justify-content-between align-items-center mb-3"> <%# Added mb-3 %>
+    <h2 class="mb-0">Jobs</h2> <%# Removed mb-2 from h2 %>
+    <%# --- Create New Job Button --- %>
+    <% if (locals.user) { %>
+      <div> <%# Simple div wrapper %>
+          <a href="/job/create" class="btn btn-primary">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2"/></svg>
+              Create New Job
+          </a>
+      </div>
+    <% } %>
+  </div>
+
+  <%# --- Filtering Section with Collapse --- %>
+  <div class="mb-4">
+    <p>
+      <button class="btn btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#filterCollapse" aria-expanded="false" aria-controls="filterCollapse">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter me-1" viewBox="0 0 16 16"><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/></svg>
+        Filter Jobs
+      </button>
+    </p>
+    <div class="collapse" id="filterCollapse">
+      <div class="card card-body">
+         <form method="GET" action="/job" id="filter-form">
+           <div class="row g-3 align-items-end">
+              <%# Status Filter %>
+              <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select class="form-select" id="status" name="status">
+                    <option value="" <%= filterValues.status === '' ? 'selected' : '' %>>Any Status</option>
+                    <option value="open" <%= filterValues.status === 'open' ? 'selected' : '' %>>Open</option>
+                    <option value="closed" <%= filterValues.status === 'closed' ? 'selected' : '' %>>Closed</option>
+                </select>
+              </div>
+
+              <%# Location Filter %>
+              <div class="col-md-3">
+                <label for="location" class="form-label">Location Type</label>
+                 <select class="form-select" id="location" name="location">
+                    <option value="" <%= filterValues.location === '' ? 'selected' : '' %>>Any Location</option>
+                    <option value="remote" <%= filterValues.location === 'remote' ? 'selected' : '' %>>Remote</option>
+                    <option value="in_person" <%= filterValues.location === 'in_person' ? 'selected' : '' %>>In-Person</option>
+                    <option value="hybrid" <%= filterValues.location === 'hybrid' ? 'selected' : '' %>>Hybrid</option>
+                 </select>
+              </div>
+
+              <%# Salary Filter %>
+              <div class="col-md-3">
+                <label for="minSalary" class="form-label">Min Salary (£/year)</label>
+                <input type="number" class="form-control" id="minSalary" name="minSalary" placeholder="e.g., 40000" value="<%= filterValues.minSalary %>" min="0" step="1000">
+              </div>
+
+               <%# Working Hours Filter %>
+               <div class="col-md-3">
+                    <label for="hoursOperator" class="form-label">Weekly Hours</label>
+                    <div class="input-group">
+                         <select class="form-select flex-grow-0 w-auto" name="hoursOperator" id="hoursOperator">
+                             <option value="" <%= filterValues.hoursOperator === '' ? 'selected' : '' %>>Any</option>
+                             <option value="lt" <%= filterValues.hoursOperator === 'lt' ? 'selected' : '' %>><</option> <%# Less than %>
+                             <option value="gt" <%= filterValues.hoursOperator === 'gt' ? 'selected' : '' %>>></option> <%# Greater than %>
+                         </select>
+                         <input type="number" class="form-control" name="hoursValue" placeholder="Hours" value="<%= filterValues.hoursValue %>" min="1" max="48" step="1" aria-label="Weekly hours value">
+                    </div>
+               </div>
+
+               <%# Skill Match Filter %>
+               <% if (locals.user && userSkillsCount > 0) { %>
+                 <div class="col-md-12 mt-3"> <%# Full width on next row %>
+                    <div class="form-check">
+                      <input class="form-check-input" type="checkbox" value="true" id="match" name="match" <%= filterValues.match ? 'checked' : '' %>>
+                      <label class="form-check-label" for="match">
+                        Show only jobs where I meet all skill requirements
+                      </label>
+                    </div>
+                 </div>
+               <% } else if (locals.user) { %>
+                 <div class="col-md-12 mt-3">
+                    <div class="form-text text-muted">
+                        <a href="/profile/skills/edit">Add your skills</a> to filter by requirements match.
+                    </div>
+                 </div>
+               <% } %>
+
+               <%# Action Buttons %>
+               <div class="col-md-12 d-flex justify-content-end gap-2 mt-3">
+                    <button type="submit" class="btn btn-primary">Apply Filters</button>
+                    <a href="/job" class="btn btn-outline-secondary">Reset Filters</a>
+               </div>
+           </div>
+         </form>
+      </div>
+    </div>
+  </div> <%# End Filter Section %>
+
+
+  <%# --- Results Count --- %>
+  <% if (totalJobs > 0) { %>
+     <% const startItem = (currentPage - 1) * itemsPerPage + 1; %>
+     <% const endItem = Math.min(currentPage * itemsPerPage, totalJobs); %>
+     <p class="text-muted mb-2">Showing <%= startItem %>-<%= endItem %> of <%= totalJobs %> jobs</p>
+  <% } %>
+
+  <%# --- Job Table --- %>
+  <% if (jobs && jobs.length) { %>
+    <div class="table-responsive">
+      <table class="table table-hover border rounded align-middle"> <%# Added align-middle %>
+        <thead class="table-light"> <%# Light header %>
+          <tr>
+            <th>Title</th>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Salary</th>
+            <th>Hours</th> <%# Added Hours Col %>
+            <% if (locals.user && userSkillsCount > 0 && perfectMatchJobIds !== null) { %>
+                <th class="text-center">Skill Match?</th>
+            <% } %>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% jobs.forEach(job => { %>
+          <tr>
+            <td><a href="/job/job/<%= job.id %>"><%= job.title %></a></td>
+            <td><%= job.company_name || 'N/A' %></td>
+            <td><span class="badge bg-<%= job.status === 'open' ? 'success' : 'secondary' %>"><%= job.status.charAt(0).toUpperCase() + job.status.slice(1) %></span></td>
+            <td><% if (job.salary_amount) { %><%= job.salary_amount.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><% } else { %>N/A<% } %></td>
+            <td><%= job.weekly_hours ? `${job.weekly_hours} / wk` : 'N/A' %></td>
+
+             <%# Display Match Status Column %>
+             <% if (locals.user && userSkillsCount > 0 && perfectMatchJobIds !== null) { %>
+                <td class="text-center">
+                   <% if (perfectMatchJobIds.has(job.id)) { %>
+                        <span class="badge bg-success" title="You meet all skill requirements.">✓</span>
+                   <% } else { %>
+                         <%# Optionally show a partial match indicator later %>
+                        <span class="badge bg-light text-dark" title="View details for skill match.">?</span>
+                   <% } %>
+                </td>
+             <% } %>
+
+            <td><%# Action buttons %>
+              <%# ... (action button logic remains the same) ... %>
+                 <% if (locals.user && locals.currentUserId && job.user_id === locals.currentUserId) { %> <a class="btn btn-outline-secondary btn-sm" href="/job/edit/<%= job.id %>">Edit</a> <% } else if (locals.user && locals.currentUserId) { %> <% if (locals.appliedJobIds && locals.appliedJobIds.has(job.id)) { %> <a class="btn btn-outline-info btn-sm" href="/application/my">Applied</a> <% } else if (job.status === 'open') { %> <a class="btn btn-outline-primary btn-sm" href="/job/job/<%= job.id %>#apply-section">Apply</a> <% } else { %> <span class="text-muted fst-italic">Closed</span> <% } %> <% } else { %> <a class="btn btn-outline-secondary btn-sm" href="/job/job/<%= job.id %>">Details</a> <% } %>
+            </td>
+          </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <%# --- Pagination --- %>
+    <% if (totalPages > 1) { %>
+        <nav aria-label="Jobs pagination" class="mt-4">
+          <ul class="pagination justify-content-center">
+            <%# Previous Button %>
+            <li class="page-item <%= currentPage <= 1 ? 'disabled' : '' %>">
+              <a class="page-link" href="/job?<%= buildQueryString(filterValues, { page: currentPage - 1 }) %>" aria-label="Previous">
+                <span aria-hidden="true">«</span>
+              </a>
+            </li>
+
+            <%# Page Numbers (Simplified example: show current +/- 2 pages) %>
+            <% const pagesToShow = 5; %>
+            <% let startPage = Math.max(1, currentPage - Math.floor(pagesToShow / 2)); %>
+            <% let endPage = Math.min(totalPages, startPage + pagesToShow - 1); %>
+            <%# Adjust if near the end %>
+            <% if (endPage - startPage + 1 < pagesToShow) { startPage = Math.max(1, endPage - pagesToShow + 1); } %>
+
+             <%# Ellipsis at start %>
+             <% if (startPage > 1) { %>
+                <li class="page-item"><a class="page-link" href="/job?<%= buildQueryString(filterValues, { page: 1 }) %>">1</a></li>
+                <% if (startPage > 2) { %><li class="page-item disabled"><span class="page-link">...</span></li><% } %>
+             <% } %>
+
+            <%# Actual Page Links %>
+            <% for (let i = startPage; i <= endPage; i++) { %>
+              <li class="page-item <%= i === currentPage ? 'active' : '' %>" aria-current="<%= i === currentPage ? 'page' : '' %>">
+                <a class="page-link" href="/job?<%= buildQueryString(filterValues, { page: i }) %>"><%= i %></a>
+              </li>
+            <% } %>
+
+             <%# Ellipsis at end %>
+             <% if (endPage < totalPages) { %>
+                 <% if (endPage < totalPages - 1) { %><li class="page-item disabled"><span class="page-link">...</span></li><% } %>
+                 <li class="page-item"><a class="page-link" href="/job?<%= buildQueryString(filterValues, { page: totalPages }) %>"><%= totalPages %></a></li>
+             <% } %>
+
+
+            <%# Next Button %>
+            <li class="page-item <%= currentPage >= totalPages ? 'disabled' : '' %>">
+              <a class="page-link" href="/job?<%= buildQueryString(filterValues, { page: currentPage + 1 }) %>" aria-label="Next">
+                <span aria-hidden="true">»</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+    <% } %>
+
+
+  <% } else { %>
+     <div class="alert alert-warning" role="alert">
+        No jobs found matching your current filters. <a href="/job" class="alert-link">Reset filters</a>?
+     </div>
+     <% if (!filterValues.minSalary && !filterValues.match && !filterValues.status && !filterValues.location && !filterValues.hoursOperator && locals.user) { %>
+        <p><a class="btn btn-primary" href="/job/create">Create the first job!</a></p>
+     <% } %>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

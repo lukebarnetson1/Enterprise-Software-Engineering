@@ -1,0 +1,173 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <%# --- Job Header --- %>
+  <h2><%= job.title %></h2>
+  <% if (job.company_name) { %><h4 class="text-secondary"><%= job.company_name %></h4><% } %>
+  <p class="text-muted">
+    Posted By <%= job.author %> | Status:
+    <span class="badge bg-<%= job.status === 'open' ? 'success' : 'secondary' %>">
+      <%= job.status.charAt(0).toUpperCase() + job.status.slice(1) %>
+    </span>
+    | Posted: <%= new Date(job.created_at).toLocaleDateString() %>
+     <% if (job.updated_at && new Date(job.updated_at) > new Date(job.created_at)) { %> | Updated: <%= new Date(job.updated_at).toLocaleDateString() %><% } %>
+  </p>
+  <hr />
+
+  <div class="row mb-3 gy-3"> <%# Use gy-3 for vertical gap %>
+    <div class="col-md-8">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h5 class="card-title">Job Summary</h5>
+           <ul class="list-unstyled mb-0">
+             <% if (job.application_deadline) { %><li><strong>Apply Before:</strong> <%= new Date(job.application_deadline).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) %></li><% } %>
+             <% if (job.working_location) { %><li><strong>Location:</strong> <%= job.working_location.replace('_', '-').replace(/\b\w/g, l => l.toUpperCase()) %> <% if ((job.working_location === 'in_person' || job.working_location === 'hybrid') && job.in_person_location) { %><small class="d-block ms-3">(<%= job.in_person_location %>)</small><% } %></li><% } %>
+             <% if (job.salary_amount) { %><% const formattedSalary = job.salary_amount.toLocaleString('en-GB', { style: 'currency', currency: 'GBP', minimumFractionDigits: 0, maximumFractionDigits: 0 }) %><li><strong>Salary:</strong> <%= formattedSalary %> per year</li><% } %>
+             <% if (job.weekly_hours) { %><li><strong>Hours:</strong> Approx. <%= job.weekly_hours %> / week</li><% } %>
+             <% if (job.start_date) { %><li><strong>Starts:</strong> <%= new Date(job.start_date).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) %></li><% } %>
+           </ul>
+        </div>
+      </div>
+
+      <h5 class="mt-4">Description</h5> <%# Added mt-4 for spacing %>
+      <p style="white-space: pre-wrap;"><%= job.description %></p>
+
+      <%# Required Skills & Matching Section %>
+      <% if (job.required_skills && job.required_skills.length > 0) { %>
+        <h5 class="mt-4">Required Skills</h5>
+        <ul class="list-group list-group-flush">
+          <% job.required_skills.forEach(reqSkill => { %>
+             <% const match = locals.user && skillMatchResults ? skillMatchResults.find(m => m.id === reqSkill.id) : null; %>
+             <% const reqYearsText = reqSkill.min_years_experience === 0.5 ? '< 1 yr' : `${reqSkill.min_years_experience} yr${reqSkill.min_years_experience !== 1 ? 's' : ''}`; %>
+             <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+               <div>
+                 <strong><%= reqSkill.name %></strong>
+                 <small class="text-muted d-block">Requires: <%= reqYearsText %> experience</small>
+               </div>
+               <%# Display Match Status if user logged in %>
+               <% if (locals.user && match) { %>
+                 <% let badgeClass = 'bg-secondary'; let badgeText = 'Info Unavailable'; let userYearsText = ''; %>
+                 <% if (match.user_years !== undefined) userYearsText = match.user_years === 0.5 ? '< 1 yr' : `${match.user_years} yr${match.user_years !== 1 ? 's' : ''}`; %>
+
+                 <% if (match.status === 'met') { badgeClass = 'bg-success'; badgeText = 'Met'; } %>
+                 <% if (match.status === 'insufficient') { badgeClass = 'bg-warning text-dark'; badgeText = `Short by ${match.difference} yr${match.difference !== 1 ? 's' : ''}`; } %>
+                 <% if (match.status === 'missing') { badgeClass = 'bg-danger'; badgeText = 'Skill Missing'; userYearsText = 'N/A'; } %>
+
+                 <span class="badge <%= badgeClass %> rounded-pill text-end">
+                    Your Exp: <%= userYearsText %> <br> <%= badgeText %>
+                 </span>
+               <% } else if (locals.user) { %>
+                   <span class="badge bg-light text-dark rounded-pill">Your skills not set?</span>
+               <% } %>
+             </li>
+          <% }); %>
+        </ul>
+      <% } %> <%# End Required Skills %>
+
+    </div> <%# End Left Column %>
+
+    <%# --- Right Column (Hours ONLY) --- %>
+    <div class="col-md-4">
+       <%# Working Hours Card %>
+        <%# <pre style="...">...</pre> %>
+        <% if (job.working_hours_details && Array.isArray(job.working_hours_details) && job.working_hours_details.length > 0) { %>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Typical Working Hours</h5>
+                    <div class="table-responsive working-hours-grid-container">
+                        <table class="table table-bordered working-hours-grid table-sm">
+                            <%# Logic to generate table headers %>
+                            <thead>
+                                <tr>
+                                    <th style="font-size: 0.7rem;">Time</th>
+                                    <% const daysHeader = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']; %>
+                                    <% daysHeader.forEach(day => { %><th style="font-size: 0.7rem;"><%= day %></th><% }); %>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <%# Logic to generate table rows and cells %>
+                                <% const hours = Array.from({length: 24}, (_, i) => String(i).padStart(2, '0')); %>
+                                <% const allTimes = hours.map(h => `${h}:00`); %>
+                                <% const daysData = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']; %>
+                                <% const selectedSlots = new Set(); %>
+                                <% job.working_hours_details.forEach(slot => { selectedSlots.add(`${slot.day}-${slot.time}`); }); %>
+
+                                <% allTimes.forEach(time => { %>
+                                <tr>
+                                    <td style="font-size: 0.65rem;"><%= time %></td>
+                                    <% daysData.forEach(day => { %>
+                                        <% const isSelected = selectedSlots.has(`${day}-${time}`); %>
+                                        <td class="time-slot <%= isSelected ? 'selected' : '' %>"
+                                            data-day="<%= day %>"
+                                            data-time="<%= time %>"
+                                            style="height: 15px; padding:0; line-height: 15px; background-color: <%= isSelected ? 'var(--secondary-color)' : 'inherit' %>;"
+                                            title="<%= isSelected ? 'Working' : '' %>">
+                                            <%# Content removed for read-only view %>
+                                        </td>
+                                    <% }); %>
+                                </tr>
+                                <% }); %>
+                            </tbody>
+                        </table>
+                    </div>
+                    <small class="text-muted d-block mt-1">Highlighted slots indicate typical times.</small>
+                </div>
+            </div>
+        <% } %>
+    </div> <%# End Right Column %>
+
+  </div> <%# End Main Content Row %>
+
+  <hr />
+
+  <%# Action Section (Manage / Apply / Login Prompt) %>
+  <div class="mt-4">
+      <%# ... (Rest of the file remains the same) ... %>
+       <% if (locals.user && isOwner) { %>
+          <h3>Manage Job</h3>
+          <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-primary" href="/job/edit/<%= job.id %>">Edit Job</a>
+              <form method="POST" action="/job/delete/<%= job.id %>" style="display: inline;" onsubmit="return confirm('Delete this job and associated applications?');"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><button class="btn btn-danger" type="submit">Delete Job</button></form>
+              <a class="btn btn-outline-secondary" href="/application/received">View Received Applications</a>
+          </div>
+      <% } else if (locals.user) { %>
+          <% if (userApplication) { %>
+              <h3>Your Application</h3>
+              <%# Determine badge class/text based on status %>
+              <%
+                let appStatusText = userApplication.status.charAt(0).toUpperCase() + userApplication.status.slice(1);
+                let appBadgeClass = 'secondary';
+                if (userApplication.status === 'pending') { appBadgeClass = 'warning text-dark'; }
+                else if (userApplication.status === 'hired') { appBadgeClass = 'info'; appStatusText = 'Offered'; }
+                else if (userApplication.status === 'accepted') { appBadgeClass = 'success'; }
+                else if (userApplication.status === 'offer_declined') { appBadgeClass = 'secondary'; appStatusText = 'Offer Declined'; }
+                else if (userApplication.status === 'rejected') { appBadgeClass = 'danger'; }
+              %>
+              <div class="card mb-3 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title"><%= userApplication.title %></h5>
+                    <p class="card-text" style="white-space: pre-wrap;"><%= userApplication.description %></p>
+                    <p class="card-text">
+                        <small class="text-muted">Status:
+                            <span class="badge bg-<%= appBadgeClass %>"><%= appStatusText %></span> | Applied: <%= new Date(userApplication.created_at).toLocaleDateString('en-GB') %>
+                        </small>
+                    </p>
+                    <a href="/application/my" class="btn btn-outline-primary btn-sm">View All My Applications</a>
+                 </div>
+               </div>
+          <% } else if (job.status === 'open') { %>
+              <h3 id="apply-section">Apply for this job</h3>
+              <form method="POST" action="/application/apply/<%= job.id %>"><input type="hidden" name="_csrf" value="<%= csrfToken %>" /><div class="mb-3"><label class="form-label" for="title">Application Title:</label><input class="form-control" type="text" id="title" name="title" required value="Application for <%= job.title %>"/></div><div class="mb-3"><label class="form-label" for="description">Cover Letter / Message:</label><textarea class="form-control" id="description" name="description" required rows="5" placeholder="Tell us why you're a good fit..."></textarea></div><button class="btn btn-primary" type="submit">Submit Application</button></form>
+          <% } else { %>
+              <h3>Applications Closed</h3>
+              <div class="alert alert-secondary" role="alert">This job posting is now closed.</div>
+          <% } %>
+      <% } else { %>
+          <h3 id="apply-section">Apply for this job</h3>
+          <div class="alert alert-info" role="alert">Please <a href="/auth/login?returnTo=/job/job/<%= job.id %>" class="alert-link">log in</a> or <a href="/auth/signup" class="alert-link">sign up</a> to apply.</div>
+      <% } %>
+  </div>
+
+</div> <%# End Container %>
+
+<%- include('../partials/footer') %>

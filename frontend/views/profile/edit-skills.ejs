@@ -1,0 +1,92 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2>Edit Your Skills</h2>
+  <p>Select the skills you possess and specify your years of experience for each.</p>
+
+  <form method="POST" action="/profile/skills/edit">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+    <div class="mb-3">
+      <% if (allSkills && allSkills.length > 0) { %>
+        <% const skillsByCategory = allSkills.reduce((acc, skill) => {
+             const category = skill.category || 'Other';
+             if (!acc[category]) acc[category] = [];
+             acc[category].push(skill);
+             return acc;
+         }, {});
+        %>
+
+        <% Object.keys(skillsByCategory).sort().forEach(category => { %>
+          <fieldset class="mb-4 p-3 border rounded">
+             <legend class="h5"><%= category %></legend>
+             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+               <% skillsByCategory[category].forEach(skill => { %>
+                 <div class="col">
+                    <div class="form-check mb-2">
+                      <input
+                        class="form-check-input skill-checkbox"
+                        type="checkbox"
+                        id="skill-<%= skill.id %>"
+                        data-skill-id="<%= skill.id %>"
+                        <%= userSkillsMap[skill.id] !== undefined ? 'checked' : '' %>
+                      />
+                      <label class="form-check-label" for="skill-<%= skill.id %>">
+                        <%= skill.name %>
+                      </label>
+                    </div>
+                    <div class="mb-2 skill-experience-input" id="exp-input-<%= skill.id %>" style="<%= userSkillsMap[skill.id] !== undefined ? '' : 'display: none;' %>">
+                       <label for="skills[<%= skill.id %>]" class="form-label small visually-hidden">Years for <%= skill.name %></label>
+                        <select
+                            class="form-select form-select-sm"
+                            name="skills[<%= skill.id %>]"
+                            id="skills[<%= skill.id %>]"
+                            <%= userSkillsMap[skill.id] !== undefined ? '' : 'disabled' %> <!-- Enable/disable with checkbox -->
+                        >
+                            <option value="0.5" <%= userSkillsMap[skill.id] === 0.5 ? 'selected' : '' %>> < 1 year</option>
+                            <% for(let y=1; y <= 10; y++) { %>
+                                <option value="<%= y %>" <%= userSkillsMap[skill.id] === y ? 'selected' : '' %>><%= y %> year<%= y > 1 ? 's' : '' %></option>
+                            <% } %>
+                            <option value="11" <%= userSkillsMap[skill.id] > 10 ? 'selected' : '' %>>10+ years</option>
+                        </select>
+                    </div>
+                 </div>
+               <% }); %>
+             </div>
+          </fieldset>
+        <% }); %>
+      <% } else { %>
+        <p class="text-muted">No skills available to select.</p>
+      <% } %>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2">
+       <a href="/settings" class="btn btn-secondary">Cancel</a> <%# UPDATED LINK %>
+       <button type="submit" class="btn btn-primary">Save Skills</button>
+    </div>
+  </form>
+</div>
+
+<script>
+  // Simple script to show/hide experience input based on checkbox
+  document.addEventListener('DOMContentLoaded', function() {
+    const checkboxes = document.querySelectorAll('.skill-checkbox');
+    checkboxes.forEach(checkbox => {
+      checkbox.addEventListener('change', function() {
+        const skillId = this.dataset.skillId;
+        const expInputDiv = document.getElementById(`exp-input-${skillId}`);
+        const selectElement = expInputDiv ? expInputDiv.querySelector('select') : null;
+
+        if (this.checked) {
+          if (expInputDiv) expInputDiv.style.display = '';
+          if (selectElement) selectElement.disabled = false;
+        } else {
+          if (expInputDiv) expInputDiv.style.display = 'none';
+          if (selectElement) selectElement.disabled = true;
+        }
+      });
+    });
+  });
+</script>
+
+<%- include('../partials/footer') %>

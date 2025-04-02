@@ -1,0 +1,50 @@
+{
+  "name": "express-ejs-supabase-jobs",
+  "version": "1.0.0",
+  "description": "My assignment using Express, EJS, and Supabase",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest --runInBand --detectOpenHandles",
+    "coverage": "jest --coverage --runInBand --detectOpenHandles",
+    "prepare": ""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.3",
+    "bcrypt": "^5.1.1",
+    "connect-flash": "^0.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "cookie": "^1.0.2",
+    "cookie-parser": "^1.4.7",
+    "crypto": "^1.0.1",
+    "csurf": "^1.10.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.7",
+    "ejs": "^3.1.10",
+    "express": "^4.17.1",
+    "express-rate-limit": "^7.5.0",
+    "express-session": "^1.18.1",
+    "express-validator": "^7.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.10.0",
+    "pg": "^8.14.1",
+    "sanitize-html": "^2.14.0",
+    "zxcvbn": "^4.4.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.18.0",
+    "@faker-js/faker": "^9.6.0",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "globals": "^15.14.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.3.3",
+    "supertest": "^7.1.0"
+  },
+  "engines": {
+    "node": "20.19.0"
+  }
+}

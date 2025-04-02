@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title || "Job Matchmaker" %></title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="/css/styles.css" />
+    <!-- Script to prevent FOUC for Dark Mode -->
+    <script>
+      (function () {
+        try {
+          var mode = localStorage.getItem("theme");
+          if (mode === "dark") {
+            document.documentElement.classList.add("dark-mode");
+          }
+        } catch (e) { /* ignore */ }
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="border-bottom pb-2 mb-4">
+      <div class="container">
+        <img src="/img/logo.png" alt="Job Matchmaker Logo" class="header-logo" />
+        <h1 class="text-primary">Job Matchmaker</h1>
+
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav d-flex justify-content-between flex-wrap w-100">
+            <li class="nav-item flex-fill border-end text-center">
+              <a class="nav-link" href="/job">Job Board</a>
+            </li>
+            <% if (locals.user) { %>
+            <li class="nav-item flex-fill border-end text-center">
+              <a class="nav-link" href="/job/create">Create Job</a>
+            </li>
+            <li class="nav-item dropdown flex-fill border-end text-center">
+                <a class="nav-link dropdown-toggle" href="#" id="applicationsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    Applications
+                </a>
+                <ul class="dropdown-menu" aria-labelledby="applicationsDropdown">
+                    <li><a class="dropdown-item" href="/application/my">My Applications</a></li>
+                    <li><a class="dropdown-item" href="/application/received">Received Applications</a></li>
+                </ul>
+            </li>
+             <li class="nav-item flex-fill border-end text-center">
+              <a class="nav-link" href="/profile/skills/edit">My Skills</a>
+            </li>
+            <li class="nav-item flex-fill border-end text-center">
+              <a class="nav-link" href="/settings">Settings</a>
+            </li>
+            <li class="nav-item flex-fill text-center">
+              <a class="nav-link" href="/auth/logout">Log Out</a>
+            </li>
+            <% } else { %>
+            <li class="nav-item flex-fill border-end text-center">
+              <a class="nav-link" href="/auth/login">Log In</a>
+            </li>
+             <li class="nav-item flex-fill text-center">
+              <a class="nav-link" href="/auth/signup">Sign Up</a>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
+    </header>
+
+    <div class="container">
+      <% if (flashSuccess && flashSuccess.length) { %> <%
+      flashSuccess.forEach(msg => { %>
+      <div class="alert alert-success alert-dismissible fade show mt-2" role="alert"><%- msg %><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+      <% }); %> <% } %>
+      <% if (flashError && flashError.length) { %> <%
+      flashError.forEach(msg => { %>
+      <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert"><%- msg %><button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+      <% }); %> <% } %>
+      <!-- Start of main content area -->

@@ -1,0 +1,387 @@
+:root {
+  --primary-color: #2f80ed; /* This IS the blue used in the header */
+  --secondary-color: #56cc9d;
+  --text-color: #333;
+  --bg-color: #fff;
+  --card-bg: #f8f9fa;
+  --border-color: #dee2e6;
+  --btn-primary-text: #fff;
+  --placeholder-color: #6c757d; /* Default placeholder color */
+}
+
+html.dark-mode,
+body.dark-mode {
+  --primary-color: #2f80ed;
+  --secondary-color: #56cc9d;
+  --text-color: #eaeaea;
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --border-color: #444;
+  --btn-primary-text: #fff;
+  --placeholder-color: #adb5bd; /* Lighter placeholder for dark mode */
+  --bs-secondary-color: #adb5bd; /* Define variable here */
+
+  /* Bootstrap Variable Overrides for Dark Mode */
+  --bs-body-color: var(--text-color);
+  --bs-body-bg: var(--bg-color);
+  --bs-tertiary-bg: var(--card-bg);
+  --bs-border-color: var(--border-color);
+  --bs-link-color: #69a1ec;
+  --bs-link-hover-color: #8cbcf3;
+  --bs-emphasis-color: #fff;
+
+  /* Dark mode form control override */
+  --bs-form-control-bg: var(--card-bg);
+  --bs-form-control-color: var(--text-color);
+  --bs-form-control-border-color: var(--border-color);
+  --bs-form-select-bg: var(--card-bg);
+  --bs-form-select-color: var(--text-color);
+  --bs-form-select-border-color: var(--border-color);
+  --bs-input-group-addon-bg: var(--card-bg);
+  --bs-input-group-addon-color: var(--text-color);
+  --bs-input-group-addon-border-color: var(--border-color);
+
+  /* Style date input specifically for dark mode */
+  color-scheme: dark; /* Helps browser style date picker */
+}
+/* Reset color-scheme for light mode if needed globally */
+html:not(.dark-mode),
+body:not(.dark-mode) {
+  color-scheme: light;
+}
+
+header .container h1.text-primary {
+  display: inline-block; /* Allow vertical alignment */
+  vertical-align: middle; /* Align text with middle of image */
+  margin-left: 0.5rem; /* Space between logo and text */
+  margin-bottom: 0; /* Override default h1 margin */
+}
+
+header .container .header-logo {
+  height: 40px; /* Adjust height as needed */
+  width: auto; /* Maintain aspect ratio */
+  vertical-align: middle; /* Align image with text */
+}
+
+/* Adjust flex alignment for the nav if needed */
+header .navbar-nav {
+  align-items: center; /* Center nav items vertically if they wrap */
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  margin: 0;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+a {
+  color: var(--bs-link-color);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+.card {
+  background-color: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  transition: background-color 0.3s;
+  border: 1px solid var(--bs-border-color);
+}
+
+/* --- Form Input Placeholder & Muted Text Styling --- */
+input::placeholder,
+textarea::placeholder {
+  color: var(--placeholder-color);
+  opacity: 1; /* Override Bootstrap's default */
+}
+.form-control::placeholder {
+  color: var(--placeholder-color);
+  opacity: 1;
+}
+.form-select {
+  background-color: var(--bs-form-select-bg);
+  color: var(--bs-form-select-color);
+  border-color: var(--bs-form-select-border-color);
+}
+.dark-mode .form-control,
+.dark-mode .form-select,
+.dark-mode .form-control-plaintext {
+  background-color: var(--bs-form-control-bg);
+  color: var(--bs-form-control-color);
+  border-color: var(--bs-form-control-border-color);
+}
+.dark-mode input.form-control-plaintext {
+  background-color: transparent !important;
+  border: none;
+  padding-left: 0;
+  padding-right: 0;
+}
+.dark-mode .form-control:focus,
+.dark-mode .form-select:focus {
+  background-color: var(--bs-form-control-bg);
+  color: var(--bs-form-control-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(47, 128, 237, 0.25);
+}
+.dark-mode .input-group-text {
+  background-color: var(--bs-input-group-addon-bg);
+  color: var(--bs-input-group-addon-color);
+  border-color: var(--bs-input-group-addon-border-color);
+}
+.dark-mode .text-muted {
+  color: var(--bs-secondary-color) !important;
+}
+
+/* Button styles */
+button,
+.btn {
+  display: inline-block;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+  background-color: transparent;
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  border-radius: 0.375rem;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
+}
+.btn-primary {
+  color: var(--btn-primary-text);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-primary:hover {
+  color: var(--btn-primary-text);
+  background-color: #1e6ad5;
+  border-color: #1c63c6;
+}
+.dark-mode .btn-primary:hover {
+  color: var(--btn-primary-text);
+  background-color: #5c9eff;
+  border-color: #5c9eff;
+}
+.btn-secondary {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.btn-secondary:hover {
+  color: #fff;
+  background-color: #5c636a;
+  border-color: #565e64;
+}
+.btn-danger {
+  color: #fff;
+  background-color: #dc3545;
+  border-color: #dc3545;
+}
+.btn-danger:hover {
+  color: #fff;
+  background-color: #bb2d3b;
+  border-color: #b02a37;
+}
+.btn-outline-primary {
+  color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.btn-outline-primary:hover {
+  color: var(--btn-primary-text);
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+.dark-mode .btn-outline-primary {
+  color: var(--bs-link-color);
+  border-color: var(--bs-link-color);
+}
+.dark-mode .btn-outline-primary:hover {
+  color: var(--bg-color);
+  background-color: var(--bs-link-color);
+  border-color: var(--bs-link-color);
+}
+.btn-outline-secondary {
+  color: #6c757d;
+  border-color: #6c757d;
+}
+.dark-mode .btn-outline-secondary {
+  color: #adb5bd;
+  border-color: #adb5bd;
+}
+.btn-outline-secondary:hover {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+}
+.dark-mode .btn-outline-secondary:hover {
+  color: var(--bg-color);
+  background-color: #adb5bd;
+  border-color: #adb5bd;
+}
+.btn-outline-info {
+  color: #0dcaf0;
+  border-color: #0dcaf0;
+}
+.btn-outline-info:hover {
+  color: #000;
+  background-color: #0dcaf0;
+  border-color: #0dcaf0;
+}
+.dark-mode .btn-outline-info {
+  color: #6edff6;
+  border-color: #6edff6;
+}
+.dark-mode .btn-outline-info:hover {
+  color: #000;
+  background-color: #6edff6;
+  border-color: #6edff6;
+}
+/* End of button styles */
+
+header {
+  background: var(--card-bg);
+  padding: 1rem;
+  border-bottom: 1px solid var(--bs-border-color);
+  margin-bottom: 2rem;
+}
+header h1.text-primary {
+  color: var(--primary-color) !important;
+}
+.dark-mode header h1.text-primary {
+  color: var(--primary-color) !important;
+}
+
+.navbar-nav .nav-link {
+  font-weight: bold;
+  color: var(--bs-body-color);
+}
+.navbar-nav .nav-link:hover {
+  color: var(--primary-color);
+}
+.dark-mode .navbar-nav .nav-link:hover {
+  color: var(--bs-link-hover-color);
+}
+
+/* --- Dark Mode Table Styling --- */
+.dark-mode .table {
+  --bs-table-color: var(--text-color);
+  --bs-table-bg: var(--card-bg);
+  --bs-table-border-color: var(--border-color);
+  --bs-table-striped-bg: rgba(255, 255, 255, 0.03);
+  --bs-table-striped-color: var(--text-color);
+  --bs-table-active-bg: rgba(255, 255, 255, 0.05);
+  --bs-table-active-color: var(--text-color);
+  --bs-table-hover-bg: rgba(255, 255, 255, 0.07);
+  --bs-table-hover-color: var(--text-color);
+  color: var(--bs-table-color);
+  border-color: var(--bs-table-border-color);
+}
+.dark-mode .table thead th {
+  color: var(--text-color);
+  border-bottom-width: 2px;
+  border-color: var(--border-color);
+}
+.dark-mode .table td a {
+  color: var(--bs-link-color);
+}
+.dark-mode .table td a:hover {
+  color: var(--bs-link-hover-color);
+}
+
+.dark-mode .table thead th {
+  color: var(--bs-emphasis-color);
+  background-color: var(--bs-tertiary-bg); /* Match card/input background */
+  border-color: var(--bs-border-color); /* Ensure border color matches */
+  border-bottom-width: 2px; /* Keep thicker bottom border */
+}
+
+.toggle-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+/* --- Working Hours Grid Styling --- */
+.working-hours-grid-container {
+  margin-top: 0.5rem;
+}
+
+.working-hours-grid {
+  border-collapse: collapse; /* Ensure borders merge */
+}
+
+.working-hours-grid th,
+.working-hours-grid td {
+  border: 1px solid var(--bs-border-color);
+  padding: 0.3rem 0.2rem;
+  text-align: center;
+  font-size: 0.75rem;
+  min-width: 35px;
+  vertical-align: middle;
+}
+
+.working-hours-grid thead th {
+  background-color: var(--bs-tertiary-bg);
+  font-weight: bold;
+  user-select: none;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.working-hours-grid tbody td:first-child {
+  font-weight: bold;
+  background-color: var(--bs-tertiary-bg);
+  user-select: none;
+  font-size: 0.7rem;
+  padding: 0.3rem 0.1rem;
+}
+
+.working-hours-grid td.time-slot {
+  cursor: pointer;
+  transition: background-color 0.1s ease-in-out;
+  user-select: none;
+  height: 25px;
+  line-height: 25px;
+  padding: 0;
+}
+
+.working-hours-grid td.time-slot.selected {
+  background-color: var(--secondary-color);
+  color: #fff;
+}
+.dark-mode .working-hours-grid td.time-slot.selected {
+  background-color: var(--secondary-color);
+  color: #111;
+}
+
+/* Hover effect */
+.working-hours-grid td.time-slot:hover {
+  background-color: rgba(0, 0, 0, 0.1); /* Slight darken */
+}
+.dark-mode .working-hours-grid td.time-slot:hover {
+  background-color: rgba(255, 255, 255, 0.1); /* Slight lighten */
+}
+
+#weekly-hours-display {
+  font-weight: bold;
+  margin-top: 0.5rem;
+}

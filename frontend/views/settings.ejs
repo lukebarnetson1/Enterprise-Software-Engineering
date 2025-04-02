@@ -1,0 +1,128 @@
+<%- include('partials/header') %>
+
+<div class="container mt-4">
+  <h2>Settings</h2>
+
+  <div class="row mt-4 gy-4"> <%# Use grid row for layout %>
+
+    <%# === Account Information Section === %>
+    <div class="col-md-6">
+      <div class="card h-100"> <%# Use h-100 for equal height cards %>
+        <div class="card-header">
+          <h5 class="mb-0">Account Information</h5>
+        </div>
+        <div class="card-body">
+          <% if (locals.user) { %>
+            <dl class="row mb-0">
+              <dt class="col-sm-4">Email Address:</dt>
+              <dd class="col-sm-8"><%= user.email %></dd>
+
+              <dt class="col-sm-4">Username:</dt>
+              <dd class="col-sm-8"><%= user.username %></dd>
+
+              <dt class="col-sm-4">Email Verified:</dt>
+              <dd class="col-sm-8">
+                 <span class="badge bg-<%= user.is_verified ? 'success' : 'warning text-dark' %>">
+                     <%= user.is_verified ? 'Yes' : 'No' %>
+                 </span>
+                 <% if (!user.is_verified) { %>
+                    <small class="d-block text-muted">Check your email for verification link.</small>
+                 <% } %>
+              </dd>
+            </dl>
+          <% } else { %>
+            <p class="text-muted">Not logged in.</p>
+          <% } %>
+        </div>
+      </div>
+    </div>
+
+    <%# === Account Actions Section === %>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h5 class="mb-0">Account Actions</h5>
+            </div>
+            <div class="card-body d-flex flex-column"> <%# Flex column for spacing %>
+                <p>Manage your account details and security settings.</p>
+                <div class="mt-auto d-flex flex-wrap gap-2 justify-content-center"> <%# Use flexbox for button layout %>
+                    <a class="btn btn-outline-primary" href="/auth/update-email">Change Email</a>
+                    <a class="btn btn-outline-primary" href="/auth/update-username">Change Username</a>
+                    <a class="btn btn-outline-secondary" href="/auth/forgot">Reset Password</a>
+                    <%# *** CHANGE: Applied btn and btn-outline-danger classes *** %>
+                    <a class="btn btn-outline-danger" href="/auth/delete-account">Delete Account</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%# === Notification Preferences Section === %>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Notification Preferences</h5>
+        </div>
+        <div class="card-body">
+           <p>Choose which email notifications you wish to receive.</p>
+           <form method="POST" action="/settings">
+               <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+               <div class="form-check form-switch mb-2">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="notify_own_status_change"
+                        name="notify_own_status_change"
+                        <%= user.notify_own_status_change ? 'checked' : '' %>
+                    />
+                    <label class="form-check-label" for="notify_own_status_change">
+                        Notify me when my application status is updated (e.g., Hired, Rejected)
+                    </label>
+                </div>
+
+                 <div class="form-check form-switch mb-3">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="notify_new_applicant_for_my_job"
+                        name="notify_new_applicant_for_my_job"
+                         <%= user.notify_new_applicant_for_my_job ? 'checked' : '' %>
+                    />
+                    <label class="form-check-label" for="notify_new_applicant_for_my_job">
+                        Notify me when someone applies to a job I posted
+                    </label>
+                </div>
+
+                <%# *** CHANGE: Changed btn-primary to btn-outline-primary *** %>
+                <button type="submit" class="btn btn-outline-primary">Save Preferences</button>
+           </form>
+        </div>
+      </div>
+    </div>
+
+    <%# === Display Settings Section === %>
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-header">
+          <h5 class="mb-0">Display Settings</h5>
+        </div>
+        <div class="card-body">
+            <div class="form-check form-switch">
+                <input
+                class="form-check-input"
+                type="checkbox"
+                role="switch"
+                id="theme-toggle"
+                />
+                <label class="form-check-label" for="theme-toggle">Dark Mode</label>
+            </div>
+        </div>
+      </div>
+    </div>
+
+  </div> <%# End row %>
+</div>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,74 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2 class="mb-4">My Applications</h2>
+
+  <% if (applications && applications.length) { %>
+  <div class="row row-cols-1 row-cols-md-2 g-4">
+    <% applications.forEach(app => { %>
+    <div class="col">
+      <div class="card shadow-sm border-0 rounded-3 h-100">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title">
+            <%= app.title %>
+            <%# Combined EJS block for status logic %>
+            <%
+              let statusText = app.status.charAt(0).toUpperCase() + app.status.slice(1);
+              let badgeClass = 'secondary';
+              if (app.status === 'pending') {
+                  badgeClass = 'warning text-dark';
+              } else if (app.status === 'hired') {
+                  badgeClass = 'info';
+                  statusText = 'Offered';
+              } else if (app.status === 'accepted') {
+                  badgeClass = 'success';
+              } else if (app.status === 'offer_declined') {
+                  badgeClass = 'secondary';
+                  statusText = 'Offer Declined';
+              } else if (app.status === 'rejected') {
+                  badgeClass = 'danger';
+              }
+            %>
+            <span class="badge bg-<%= badgeClass %>">
+                <%= statusText %>
+            </span>
+          </h5>
+          <p class="card-text mb-2"><%= app.description %></p>
+          <p class="text-muted mb-3 small">
+            Applied <%= locals.relativeTime ? relativeTime : new Date(app.created_at).toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }) %>
+          </p>
+
+          <div class="mt-auto d-flex gap-2 justify-content-start align-items-center"> <%# Use flex for buttons %>
+             <a class="btn btn-sm btn-outline-primary" href="/job/job/<%= app.job_id %>">View Job</a>
+
+             <%# Offer Action Buttons %>
+             <% if (app.status === 'hired') { %>
+              <%# Accept Link (leads to confirmation page) - Ensure btn-success %>
+                <a href="/application/confirm-accept/<%= app.id %>" class="btn btn-sm btn-success">Accept Offer</a> <%# Already btn-success, ensure it stays %>
+
+                <%# Decline Form %>
+                 <form
+                    method="POST"
+                    action="/application/decline/<%= app.id %>"
+                    onsubmit="return confirm('Are you sure you want to decline this job offer?')"
+                    style="display: inline;"
+                >
+                    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+                    <button type="submit" class="btn btn-sm btn-danger">Decline Offer</button>
+                 </form> <%# End Decline Form %>
+             <% } %>
+             <%# End Offer Action Buttons %>
+
+          </div>
+        </div>
+      </div>
+    </div>
+    <% }); %>
+  </div>
+  <% } else { %>
+  <p class="text-muted">You haven't applied to any jobs yet.</p>
+  <a href="/job" class="btn btn-primary">Browse Jobs</a>
+  <% } %>
+</div>
+
+<%- include('../partials/footer') %>

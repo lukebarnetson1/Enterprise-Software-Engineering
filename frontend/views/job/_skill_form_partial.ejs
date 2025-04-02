@@ -1,0 +1,97 @@
+<%# Partial for displaying skill selection in job forms %>
+<%# Expects: allSkills (array), entitySkillsMap (object {skill_id: years}), entityType ('user' or 'job') %>
+
+<%
+const isJobForm = entityType === 'job';
+const yearsFieldName = isJobForm ? 'min_years_experience' : 'years_experience';
+const formInputNamePrefix = isJobForm ? 'skills' : 'skills'; // Keep same for simplicity? Or use 'user_skills'?
+const yearsLabel = isJobForm ? 'Min. Years Req.' : 'Your Experience';
+%>
+
+<fieldset class="mb-4 p-3 border rounded">
+    <legend class="h4"><%= isJobForm ? 'Required Skills' : 'Your Skills' %></legend>
+    <p class="text-muted small">
+        <%= isJobForm ? 'Select skills required for this role and the minimum years of experience.' : 'Select your skills and specify your years of experience.' %>
+        Use 0.5 for less than 1 year.
+    </p>
+
+    <% if (allSkills && allSkills.length > 0) { %>
+      <% const skillsByCategory = allSkills.reduce((acc, skill) => {
+           const category = skill.category || 'Other';
+           if (!acc[category]) acc[category] = [];
+           acc[category].push(skill);
+           return acc;
+       }, {});
+      %>
+
+      <% Object.keys(skillsByCategory).sort().forEach(category => { %>
+        <div class="mb-4">
+           <h5 class="mb-3 text-secondary border-bottom pb-1"><%= category %></h5>
+           <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+             <% skillsByCategory[category].forEach(skill => { %>
+               <% const currentYears = entitySkillsMap[skill.id]; %>
+               <% const isChecked = currentYears !== undefined; %>
+               <div class="col">
+                  <div class="form-check mb-2">
+                    <input
+                      class="form-check-input skill-checkbox-<%= entityType %>"
+                      type="checkbox"
+                      id="<%= entityType %>-skill-<%= skill.id %>"
+                      data-skill-id="<%= skill.id %>"
+                      data-target-div="#<%= entityType %>-exp-input-<%= skill.id %>"
+                      data-target-select="#<%= entityType %>-skills-<%= skill.id %>"
+                      <%= isChecked ? 'checked' : '' %>
+                    />
+                    <label class="form-check-label" for="<%= entityType %>-skill-<%= skill.id %>">
+                      <%= skill.name %>
+                    </label>
+                  </div>
+                  <div class="mb-2 skill-experience-input-<%= entityType %>" id="<%= entityType %>-exp-input-<%= skill.id %>" style="<%= isChecked ? '' : 'display: none;' %>">
+                     <label for="<%= formInputNamePrefix %>[<%= skill.id %>]" class="form-label small visually-hidden"><%= yearsLabel %> for <%= skill.name %></label>
+                      <select
+                          class="form-select form-select-sm"
+                          name="<%= formInputNamePrefix %>[<%= skill.id %>]"
+                          id="<%= entityType %>-skills-<%= skill.id %>"
+                          <%= isChecked ? '' : 'disabled' %>
+                      >
+                          <option value="0.5" <%= currentYears === 0.5 ? 'selected' : '' %>> < 1 year</option>
+                          <% for(let y=1; y <= 10; y++) { %>
+                              <option value="<%= y %>" <%= currentYears === y ? 'selected' : '' %>><%= y %> year<%= y > 1 ? 's' : '' %></option>
+                          <% } %>
+                          <option value="11" <%= currentYears > 10 ? 'selected' : '' %>>10+ years</option>
+                      </select>
+                  </div>
+               </div>
+             <% }); %>
+           </div>
+        </div>
+      <% }); %>
+    <% } else { %>
+      <p class="text-muted">No skills available to select.</p>
+    <% } %>
+</fieldset>
+
+<script id="skill-form-script-<%= entityType %>">
+  document.addEventListener('DOMContentLoaded', function() {
+    if (!window.skillFormScriptLoaded_<%= entityType %>) {
+        const container = document;
+        container.querySelectorAll('.skill-checkbox-<%= entityType %>').forEach(checkbox => {
+          checkbox.addEventListener('change', function() {
+            const expInputDiv = document.querySelector(this.dataset.targetDiv);
+            const selectElement = document.querySelector(this.dataset.targetSelect);
+
+            if (expInputDiv && selectElement) {
+                if (this.checked) {
+                  expInputDiv.style.display = '';
+                  selectElement.disabled = false;
+                } else {
+                  expInputDiv.style.display = 'none';
+                  selectElement.disabled = true;
+                }
+            }
+          });
+        });
+        window.skillFormScriptLoaded_<%= entityType %> = true;
+    }
+  });
+</script>

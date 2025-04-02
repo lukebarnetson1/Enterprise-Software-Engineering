@@ -1,0 +1,47 @@
+<%- include('../partials/header') %>
+
+<div class="container mt-4">
+  <h2>Edit Application Status</h2>
+
+  <form method="POST" action="/application/edit/<%= application.id %>">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>" />
+
+    <div class="mb-3">
+        <p><strong>Applicant:</strong> <%= locals.applicantUsername || 'N/A' %></p>
+        <p><strong>Job:</strong> <%= locals.jobTitle || 'N/A' %></p>
+        <p><strong>Application Title:</strong> <%= application.title %></p>
+        <p><strong>Description:</strong> <%= application.description %></p>
+    </div>
+
+
+    <div class="mb-3">
+      <label for="status" class="form-label">Update Status:</label>
+      <%# Disable edit if status is not pending %>
+      <select class="form-select" id="status" name="status" required <%= application.status !== 'pending' ? 'disabled' : '' %>>
+        <% if (application.status === 'pending') { %>
+            <option value="pending" selected>Pending</option>
+            <option value="hired">Make Offer (Hire)</option>
+            <option value="rejected">Reject</option>
+        <% } else { %>
+            <%# Show current status if not pending, but keep disabled %>
+            <% let currentStatusText = application.status.charAt(0).toUpperCase() + application.status.slice(1); %>
+            <% if (application.status === 'hired') { currentStatusText = 'Offer Sent'; } %>
+             <% if (application.status === 'accepted') { currentStatusText = 'Offer Accepted'; } %>
+            <option value="<%= application.status %>" selected><%= currentStatusText %></option>
+        <% } %>
+      </select>
+       <% if (application.status !== 'pending') { %>
+          <div class="form-text text-muted">Status cannot be changed once an offer is made, accepted, or rejected.</div>
+       <% } else { %>
+           <div class="form-text text-muted">Setting status to 'Make Offer' will allow the applicant to accept it.</div>
+       <% } %>
+    </div>
+
+    <% if (application.status === 'pending') { %>
+        <button class="btn btn-primary" type="submit">Update Status</button>
+    <% } %>
+     <a href="/application/received" class="btn btn-secondary ms-2">Back to Received Applications</a>
+  </form>
+</div>
+
+<%- include('../partials/footer') %>
