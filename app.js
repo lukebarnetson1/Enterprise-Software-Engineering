@@ -35,7 +35,7 @@ try {
     database: dbUrl.pathname.slice(1),
     ssl:
       process.env.NODE_ENV === "production"
-        ? { rejectUnauthorised: false }
+        ? { rejectUnauthorized: false }
         : false, // Basic SSL for production DBs like Heroku
   });
   pgPool.on("connect", () =>
