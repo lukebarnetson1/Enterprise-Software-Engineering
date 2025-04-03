@@ -20,7 +20,9 @@ function configureCoreMiddleware(app) {
   // Parse Cookie header and populate req.cookies with an object keyed by the cookie names
   app.use(cookieParser());
 
-  console.log("Core middleware (static, body-parser, cookie-parser) configured.");
+  console.log(
+    "Core middleware (static, body-parser, cookie-parser) configured.",
+  );
 }
 
 module.exports = {

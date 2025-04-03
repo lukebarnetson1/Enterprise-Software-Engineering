@@ -92,10 +92,7 @@ router.post(
       if (err.message.includes("You have already applied for this job")) {
         req.flash("error", err.message);
       } else {
-        req.flash(
-          "error",
-          "Failed to submit application. Please try again.",
-        );
+        req.flash("error", "Failed to submit application. Please try again.");
       }
       // Redirect back to the job page apply section
       res.redirect(`/job/job/${jobId}#apply-section`);

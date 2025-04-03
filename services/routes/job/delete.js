@@ -28,7 +28,10 @@ router.post("/delete/:id", isAuthenticated, async (req, res, next) => {
     await Job.deleteJob(jobId);
 
     // Success: Redirect to the job board
-    req.flash("success", "Job and associated applications deleted successfully.");
+    req.flash(
+      "success",
+      "Job and associated applications deleted successfully.",
+    );
     res.redirect("/job");
   } catch (err) {
     console.error(`Error deleting job ${jobId}:`, err);

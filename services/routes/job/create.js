@@ -91,17 +91,19 @@ router.post(
       console.error("Error creating job:", err);
 
       // Provide more specific user feedback based on common errors
-      let userErrorMessage = "Failed to create job. Please check the form and try again.";
+      let userErrorMessage =
+        "Failed to create job. Please check the form and try again.";
       if (err.message.includes("violates check constraint")) {
-          if (err.message.includes("jobs_weekly_hours_check")) {
-              userErrorMessage = "Weekly hours must be between 1 and 48.";
-          } else if (err.message.includes("start_after_deadline")) {
-              userErrorMessage = "Start date must be after the application deadline.";
-          }
+        if (err.message.includes("jobs_weekly_hours_check")) {
+          userErrorMessage = "Weekly hours must be between 1 and 48.";
+        } else if (err.message.includes("start_after_deadline")) {
+          userErrorMessage =
+            "Start date must be after the application deadline.";
+        }
       } else if (err.message.includes("violates not-null constraint")) {
         userErrorMessage = `Failed to create job: A required field was missing. (${err.detail || err.message})`;
       } else {
-          userErrorMessage = `Failed to create job: ${err.message}`;
+        userErrorMessage = `Failed to create job: ${err.message}`;
       }
 
       req.flash("error", userErrorMessage);

@@ -1,5 +1,5 @@
 // services/middlewares/index.js
-const path = require('path'); // Needed for view path adjustment
+const path = require("path"); // Needed for view path adjustment
 const { configureCoreMiddleware } = require("./core");
 const { configureRateLimiter, csrfProtection } = require("./security"); // Import both
 const { configureSessionMiddleware } = require("./session");
@@ -38,7 +38,9 @@ function initialiseMiddleware(app, pgPool) {
   // 5. Attach User and CSRF Token to res.locals (depends on session, cookies, csrf)
   attachLocals(app);
 
-  console.log("Base middleware initialisation complete (excluding routes and error handlers).");
+  console.log(
+    "Base middleware initialisation complete (excluding routes and error handlers).",
+  );
 }
 
 // Export the main initialiser and the error handler config function separately

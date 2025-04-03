@@ -13,6 +13,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.49.3",
     "bcrypt": "^5.1.1",
+    "compression": "^1.8.0",
     "connect-flash": "^0.1.1",
     "connect-pg-simple": "^10.0.0",
     "cookie": "^1.0.2",

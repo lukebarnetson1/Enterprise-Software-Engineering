@@ -1,12 +1,12 @@
 const express = require("express");
 const pg = require("pg");
 const { URL } = require("url");
-
-// Initialise middleware
+const path = require("path");
+const compression = require("compression");
 const {
   initialiseMiddleware,
   configureErrorHandlers,
-} = require("./services/middlewares"); // Points to root services/middlewares
+} = require("./services/middlewares");
 
 // Route handlers
 const jobRoutes = require("./services/routes/job");
@@ -17,8 +17,12 @@ const settingsRoutes = require("./services/routes/settings");
 const profileRoutes = require("./services/routes/profile");
 
 require("dotenv").config();
+
 const app = express();
 const port = process.env.PORT || 3000;
+
+// Compress browser responses
+app.use(compression());
 
 // Database pool for sessions
 let pgPool;
@@ -36,7 +40,7 @@ try {
     ssl:
       process.env.NODE_ENV === "production"
         ? { rejectUnauthorized: false }
-        : false, // Basic SSL for production DBs like Heroku
+        : false,
   });
   pgPool.on("connect", () =>
     console.log("PostgreSQL Pool connected successfully."),
@@ -45,14 +49,13 @@ try {
   console.log("PostgreSQL Pool configured for sessions.");
 } catch (err) {
   console.error("FATAL: Failed to configure PostgreSQL Pool:", err.message);
-  process.exit(1); // Exit if DB pool fails
+  process.exit(1);
 }
 
-// Initialise core middleware
-// This single call sets up view engine, core, security, session, flash, csrf, locals
+// Initialise other core middleware (static, body-parser, cookies, session, flash, csrf, locals)
 initialiseMiddleware(app, pgPool);
 
-//  Mount routes
+// Mount routes
 console.log("Mounting application routes...");
 app.use("/", landingRoutes);
 app.use("/auth", authRoutes);
@@ -62,10 +65,32 @@ app.use("/", settingsRoutes);
 app.use("/profile", profileRoutes);
 console.log("Application routes mounted.");
 
+// Configure 404 and global error handlers
 configureErrorHandlers(app);
 
+// Server startup
 if (require.main === module) {
   (async () => {
+    // Check RESET_DB environment variable *before* potentially requiring resetDb
+    if (process.env.RESET_DB === "true") {
+      console.log(
+        "RESET_DB flag is set to true. Initializing database reset...",
+      );
+      try {
+        const resetDb = require("./scripts/resetDb");
+        await resetDb(); // Ensure DB reset completes before starting server
+        console.log("Database reset complete. Starting server...");
+      } catch (resetError) {
+        console.error(
+          "FATAL: Database reset failed. Server not starting.",
+          resetError,
+        );
+        process.exit(1); // Exit if reset fails
+      }
+    } else {
+      console.log("RESET_DB flag not set or false. Skipping database reset.");
+    }
+
     // Start the server
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);

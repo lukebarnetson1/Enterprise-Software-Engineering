@@ -12,7 +12,8 @@ function configureRateLimiter(app) {
     max: 150, // Limit each IP to 150 requests per windowMs
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    message: "Too many requests from this IP, please try again after 15 minutes",
+    message:
+      "Too many requests from this IP, please try again after 15 minutes",
   });
   app.use(limiter);
   console.log("Rate limiting middleware configured.");

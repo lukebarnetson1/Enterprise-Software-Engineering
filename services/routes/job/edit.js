@@ -33,18 +33,26 @@ router.get("/edit/:id", isAuthenticated, async (req, res, next) => {
       req.flash("error", "You are not authorized to edit this job.");
       return res.redirect("/job"); // Redirect to job board
     }
-     let workingHoursDetailsString = "[]"; // Default
-     if (job.working_hours_details) {
-         if (typeof job.working_hours_details === 'string') {
-             // Already a string, use it (validate JSON?)
-             try { JSON.parse(job.working_hours_details); workingHoursDetailsString = job.working_hours_details; } catch { /* Ignore invalid JSON string, use default */ }
-         } else if (Array.isArray(job.working_hours_details)) {
-             // Convert array to JSON string
-             workingHoursDetailsString = JSON.stringify(job.working_hours_details);
-         }
-     }
-     // Modify the job object before passing it to the view
-     const jobForView = { ...job, working_hours_details: workingHoursDetailsString };
+    let workingHoursDetailsString = "[]"; // Default
+    if (job.working_hours_details) {
+      if (typeof job.working_hours_details === "string") {
+        // Already a string, use it (validate JSON?)
+        try {
+          JSON.parse(job.working_hours_details);
+          workingHoursDetailsString = job.working_hours_details;
+        } catch {
+          /* Ignore invalid JSON string, use default */
+        }
+      } else if (Array.isArray(job.working_hours_details)) {
+        // Convert array to JSON string
+        workingHoursDetailsString = JSON.stringify(job.working_hours_details);
+      }
+    }
+    // Modify the job object before passing it to the view
+    const jobForView = {
+      ...job,
+      working_hours_details: workingHoursDetailsString,
+    };
 
     // Create a map of the job's current skills { skill_id: min_years } for the form partial
     const jobSkillsMap = (job.required_skills || []).reduce((map, skill) => {

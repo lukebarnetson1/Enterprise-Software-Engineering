@@ -17,7 +17,8 @@ function configureSessionMiddleware(app, pgPool) {
         tableName: "session",
         createTableIfMissing: false,
       }),
-      secret: process.env.SESSION_SECRET || "a_very_weak_default_secret_change_me", // Use env var or strong default
+      secret:
+        process.env.SESSION_SECRET || "a_very_weak_default_secret_change_me", // Use env var or strong default
       resave: false, // Don't save session if unmodified
       saveUninitialized: false, // Don't create session until something stored
       cookie: {

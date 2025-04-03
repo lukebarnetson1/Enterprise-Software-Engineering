@@ -22,18 +22,23 @@ router.get("/job/:id", isAuthenticated, async (req, res, next) => {
     }
 
     // --- Ensure working_hours_details is an array ---
-    if ( job.working_hours_details && typeof job.working_hours_details === "string") {
+    if (
+      job.working_hours_details &&
+      typeof job.working_hours_details === "string"
+    ) {
       try {
         job.working_hours_details = JSON.parse(job.working_hours_details);
       } catch (parseError) {
-        console.error( `Error parsing working_hours_details JSON for job ${jobId}:`, parseError,);
+        console.error(
+          `Error parsing working_hours_details JSON for job ${jobId}:`,
+          parseError,
+        );
         job.working_hours_details = []; // Default to empty array on error
       }
     } else if (!Array.isArray(job.working_hours_details)) {
-        job.working_hours_details = []; // Ensure it's an array if null/undefined/not array
+      job.working_hours_details = []; // Ensure it's an array if null/undefined/not array
     }
     // --- End working_hours_details fix ---
-
 
     let userApplication = null;
     let userSkills = [];
@@ -84,7 +89,10 @@ router.get("/job/:id", isAuthenticated, async (req, res, next) => {
       csrfToken: req.csrfToken(), // Needed for apply/delete forms on the page
     });
   } catch (err) {
-    console.error(`Error loading job detail page for ID ${req.params.id}:`, err);
+    console.error(
+      `Error loading job detail page for ID ${req.params.id}:`,
+      err,
+    );
     req.flash("error", "Failed to load job details.");
     next(err); // Pass error to global handler
   }

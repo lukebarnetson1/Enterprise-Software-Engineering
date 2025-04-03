@@ -49,16 +49,17 @@ router.get("/", isAuthenticated, async (req, res, next) => {
         userSkills = skillsResult || [];
         (appsResult || []).forEach((app) => appliedJobIds.add(app.job_id));
       } catch (userDataError) {
-        console.error("Error fetching user skills/applications:", userDataError);
+        console.error(
+          "Error fetching user skills/applications:",
+          userDataError,
+        );
         // Continue without user-specific data, maybe flash a warning?
         req.flash("warning", "Could not load your skill/application data.");
       }
     }
 
     // Build Supabase query based on filters
-    let query = supabaseClient
-      .from("jobs")
-      .select("*", { count: "exact" }); // Select all columns and get total count for pagination
+    let query = supabaseClient.from("jobs").select("*", { count: "exact" }); // Select all columns and get total count for pagination
 
     // Apply basic filters directly to the query
     if (filters.minSalary && !isNaN(parseFloat(filters.minSalary))) {
@@ -98,45 +99,66 @@ router.get("/", isAuthenticated, async (req, res, next) => {
 
       // Fetch ALL job IDs and their required skills that *potentially* match other filters
       // This is less efficient but simpler than a complex SQL join/RPC for now
-      let candidateJobsQuery = supabaseClient
-        .from("jobs")
-        .select(
-          "id, salary_amount, status, working_location, weekly_hours, job_skills!inner(skill_id, min_years_experience)", // Select required skills
-        );
+      let candidateJobsQuery = supabaseClient.from("jobs").select(
+        "id, salary_amount, status, working_location, weekly_hours, job_skills!inner(skill_id, min_years_experience)", // Select required skills
+      );
 
       // Re-apply the *same basic filters* to this candidate query
       if (filters.minSalary && !isNaN(parseFloat(filters.minSalary)))
-        candidateJobsQuery = candidateJobsQuery.gte("salary_amount", parseFloat(filters.minSalary));
-      if (filters.status) candidateJobsQuery = candidateJobsQuery.eq("status", filters.status);
-      if (filters.location) candidateJobsQuery = candidateJobsQuery.eq("working_location", filters.location);
-      if (filters.hoursOperator && filters.hoursValue && !isNaN(parseFloat(filters.hoursValue))) {
-          const hoursNum = parseFloat(filters.hoursValue);
-          if (filters.hoursOperator === 'gt') candidateJobsQuery = candidateJobsQuery.gt("weekly_hours", hoursNum);
-          else if (filters.hoursOperator === 'lt') candidateJobsQuery = candidateJobsQuery.lt("weekly_hours", hoursNum);
+        candidateJobsQuery = candidateJobsQuery.gte(
+          "salary_amount",
+          parseFloat(filters.minSalary),
+        );
+      if (filters.status)
+        candidateJobsQuery = candidateJobsQuery.eq("status", filters.status);
+      if (filters.location)
+        candidateJobsQuery = candidateJobsQuery.eq(
+          "working_location",
+          filters.location,
+        );
+      if (
+        filters.hoursOperator &&
+        filters.hoursValue &&
+        !isNaN(parseFloat(filters.hoursValue))
+      ) {
+        const hoursNum = parseFloat(filters.hoursValue);
+        if (filters.hoursOperator === "gt")
+          candidateJobsQuery = candidateJobsQuery.gt("weekly_hours", hoursNum);
+        else if (filters.hoursOperator === "lt")
+          candidateJobsQuery = candidateJobsQuery.lt("weekly_hours", hoursNum);
       }
 
       const { data: candidateJobsWithSkills, error: candidateError } =
         await candidateJobsQuery;
 
       if (candidateError) {
-        console.error("Error fetching candidate jobs for skill match:", candidateError);
+        console.error(
+          "Error fetching candidate jobs for skill match:",
+          candidateError,
+        );
         // Fallback: Ignore the match filter if there's an error
         filters.match = false; // Turn off the filter flag
-        req.flash("warning", "Could not apply skill match filter due to an error.");
+        req.flash(
+          "warning",
+          "Could not apply skill match filter due to an error.",
+        );
       } else {
         // Filter the candidate jobs based on user skills
         jobIdsToFetch = (candidateJobsWithSkills || [])
           .filter((job) => {
             const requiredSkills = job.job_skills || [];
             if (requiredSkills.length === 0) {
-                perfectMatchJobIds.add(job.id); // No skills required means perfect match
-                return true; // Include jobs with no skill requirements
+              perfectMatchJobIds.add(job.id); // No skills required means perfect match
+              return true; // Include jobs with no skill requirements
             }
 
             // Check if user meets ALL requirements for this job
             for (const reqSkill of requiredSkills) {
               const userYears = userSkillMap[reqSkill.skill_id];
-              if ( userYears === undefined || userYears < reqSkill.min_years_experience ) {
+              if (
+                userYears === undefined ||
+                userYears < reqSkill.min_years_experience
+              ) {
                 return false; // Mismatch found, exclude this job
               }
             }

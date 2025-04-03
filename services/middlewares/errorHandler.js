@@ -45,32 +45,45 @@ function configureErrorHandlers(app) {
         code: err.code,
         status: err.status, // HTTP status if attached to error
         // Conditionally log stack trace (hide in production for security)
-        stack: process.env.NODE_ENV !== "production" ? err.stack : "Stack trace hidden in production",
+        stack:
+          process.env.NODE_ENV !== "production"
+            ? err.stack
+            : "Stack trace hidden in production",
       },
     );
 
     // Handle specific error types, like CSRF errors
     if (err.code === "EBADCSRFTOKEN") {
-      console.warn(`CSRF Token Error detected for ${req.method} ${req.originalUrl}.`);
-      req.flash( "error", "Your form session has expired or is invalid. Please refresh and try again.");
+      console.warn(
+        `CSRF Token Error detected for ${req.method} ${req.originalUrl}.`,
+      );
+      req.flash(
+        "error",
+        "Your form session has expired or is invalid. Please refresh and try again.",
+      );
       // Redirect back to the referring page or a safe default
       const referer = req.header("Referer");
-      const redirectUrl = (referer && referer !== req.originalUrl) ? referer : (req.session?.returnTo || "/");
+      const redirectUrl =
+        referer && referer !== req.originalUrl
+          ? referer
+          : req.session?.returnTo || "/";
       return res.redirect(redirectUrl);
     }
 
     // Determine appropriate status code
     // Use error's status if it's a valid HTTP error code, otherwise default to 500
-    const statusCode = typeof err.status === "number" && err.status >= 400 && err.status < 600
+    const statusCode =
+      typeof err.status === "number" && err.status >= 400 && err.status < 600
         ? err.status
         : 500;
     res.status(statusCode);
 
     // Determine user-facing error message
-    let userMessage = "An unexpected error occurred on the server. Please try again later.";
+    let userMessage =
+      "An unexpected error occurred on the server. Please try again later.";
     // Show more detailed errors in development or for non-500 errors
     if (statusCode < 500 || process.env.NODE_ENV !== "production") {
-        userMessage = err.message || "An internal server error occurred.";
+      userMessage = err.message || "An internal server error occurred.";
     }
 
     // Render the standard error page (error.ejs)
@@ -83,7 +96,9 @@ function configureErrorHandlers(app) {
       // Pass layout variables, ensuring defaults
       flashSuccess: res.locals.flashSuccess || [],
       // Add the current error message to flash errors for display
-      flashError: res.locals.flashError ? [...res.locals.flashError, userMessage] : [userMessage],
+      flashError: res.locals.flashError
+        ? [...res.locals.flashError, userMessage]
+        : [userMessage],
       flashWarning: res.locals.flashWarning || [],
       csrfToken: res.locals.csrfToken || "",
       user: res.locals.user || null,
