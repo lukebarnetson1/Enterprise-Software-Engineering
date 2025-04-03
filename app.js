@@ -3,7 +3,10 @@ const pg = require("pg");
 const { URL } = require("url");
 
 // Initialise middleware
-const { initialiseMiddleware, configureErrorHandlers } = require("./services/middlewares"); // Points to root services/middlewares
+const {
+  initialiseMiddleware,
+  configureErrorHandlers,
+} = require("./services/middlewares"); // Points to root services/middlewares
 
 // Route handlers
 const jobRoutes = require("./services/routes/job");
@@ -17,7 +20,7 @@ require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// ===== Database Pool for Sessions =====
+// Database pool for sessions
 let pgPool;
 try {
   if (!process.env.DATABASE_URL) {
@@ -30,9 +33,14 @@ try {
     host: dbUrl.hostname,
     port: dbUrl.port,
     database: dbUrl.pathname.slice(1),
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorised: false } : false // Basic SSL for production DBs like Heroku
+    ssl:
+      process.env.NODE_ENV === "production"
+        ? { rejectUnauthorised: false }
+        : false, // Basic SSL for production DBs like Heroku
   });
-  pgPool.on("connect", () => console.log("PostgreSQL Pool connected successfully."));
+  pgPool.on("connect", () =>
+    console.log("PostgreSQL Pool connected successfully."),
+  );
   pgPool.on("error", (err) => console.error("PostgreSQL Pool Error:", err));
   console.log("PostgreSQL Pool configured for sessions.");
 } catch (err) {
@@ -56,31 +64,14 @@ console.log("Application routes mounted.");
 
 configureErrorHandlers(app);
 
-// ===== Reset DB and start server
-const resetDb = require("./scripts/resetDb"); // Make sure path is correct
-
 if (require.main === module) {
   (async () => {
-    // Check RESET_DB environment variable
-    if (process.env.RESET_DB === "true") {
-      console.log("RESET_DB flag is set to true. Resetting database...");
-      try {
-        await resetDb(); // Ensure DB reset completes before starting server
-        console.log("Database reset complete.");
-      } catch (resetError) {
-        console.error("FATAL: Database reset failed. Server not starting.", resetError);
-        process.exit(1); // Exit if reset fails
-      }
-    } else {
-        console.log("RESET_DB flag not set to true. Skipping database reset.");
-    }
-
     // Start the server
     app.listen(port, () => {
       console.log(`Server running on port ${port}`);
       // Log accessible URL based on environment for convenience
       const host = process.env.APP_HOST || `localhost:${port}`;
-      const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
+      const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
       console.log(`Access application at: ${protocol}://${host}`);
     });
   })();
